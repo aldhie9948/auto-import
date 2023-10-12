@@ -1,0 +1,39 @@
+{
+  "name": "auto-import-excel",
+  "version": "1.0.0",
+  "description": "PANDUAN FORMAT FILE",
+  "main": "index.ts",
+  "scripts": {
+    "start": "set \"NODE_ENV=production\" && nodemon index.ts",
+    "dev": "set \"NODE_ENV=development\" && nodemon index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "4.1.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "fs-extra": "^11.1.1",
+    "knex": "^3.0.1",
+    "lodash": "^4.17.21",
+    "log-to-file": "^3.0.3",
+    "log4js": "^6.9.1",
+    "moment": "^2.29.4",
+    "mysql": "^2.18.1",
+    "node-xlsx": "^0.23.0",
+    "nodemon": "^3.0.1",
+    "socket.io": "^4.7.2",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.14",
+    "@types/express": "^4.17.19",
+    "@types/fs-extra": "^11.0.2",
+    "@types/lodash": "^4.14.199",
+    "@types/node": "^20.8.4",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2"
+  }
+}
