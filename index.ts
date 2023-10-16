@@ -10,7 +10,7 @@ import * as XLSX from "xlsx";
 import { plansFinder } from "./src/lib/files-finder";
 import { error } from "./src/lib/logger";
 import { parseExcel } from "./src/lib/parse-excel";
-import { createPlan, updatePlan } from "./src/lib/upload-plan";
+import { uploadPlan, uploadPlanTambahan } from "./src/lib/upload-plan";
 import logsRouter from "./src/routes/logs";
 
 export const FILES_DIR = path.join(__dirname, "import");
@@ -30,15 +30,16 @@ async function main() {
     _.forEach(filenames, async function (filename) {
       const workbook = XLSX.readFile(path.join(FILES_DIR_PLANNER, filename));
       const plans = parseExcel(workbook, "Export");
-      if (!/UPDATE/gi.test(filename)) return createPlan(plans, filename);
-      else return updatePlan(plans, filename);
+      if (/TAMBAHAN/gi.test(filename))
+        return await uploadPlanTambahan(filename, plans);
+      else return await uploadPlan(filename, plans);
     });
     io.emit("main");
     setTimeout(main, interval);
   } catch (err) {
     error(err instanceof Error && error(err.message));
-    setTimeout(main, interval);
     io.emit("main");
+    setTimeout(main, interval);
   }
 }
 main();

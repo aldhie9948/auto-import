@@ -18,9 +18,21 @@ router.get("/:log", async (req, res, next) => {
     const data = await fs.readFile(path.join(LOGS_DIR, log), {
       encoding: "utf-8",
     });
+    const splited = data
+      .split("\r\n")
+      .filter((f) => f !== "")
+      .map((m) => {
+        const s = m.split("|");
+        return {
+          time: s[0],
+          category: s[1],
+          text: s[2],
+        };
+      });
+
     return res.json({
       name: log,
-      text: data.split("\n").reverse(),
+      data: splited.reverse(),
     });
   } catch (error) {
     next(error);
