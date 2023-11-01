@@ -12,9 +12,11 @@ const header = [
   "keterangan",
 ];
 
-export function parseExcel(workbook: XLSX.WorkBook, sheetName: string) {
+export function parseExcel(filepath: string) {
+  const workbook = XLSX.readFile(filepath);
+  const { SheetNames } = workbook;
   const data = XLSX.utils.sheet_to_json<IPlanDetail>(
-    workbook.Sheets[sheetName],
+    workbook.Sheets[SheetNames[0]],
     {
       header,
       defval: "",

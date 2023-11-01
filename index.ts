@@ -6,12 +6,11 @@ import _ from "lodash";
 import moment from "moment";
 import path from "path";
 import { Server } from "socket.io";
-import * as XLSX from "xlsx";
 import { plansFinder } from "./src/lib/files-finder";
-import { error } from "./src/lib/logger";
 import { parseExcel } from "./src/lib/parse-excel";
-import { uploadPlan, uploadPlanTambahan } from "./src/lib/upload-plan";
+import { uploadPlanOrigin } from "./src/lib/upload-plan-origin";
 import logsRouter from "./src/routes/logs";
+import { uploadPlanTambahan } from "./src/lib/upload-plan-tambahan";
 
 export const FILES_DIR = path.join(__dirname, "import");
 export const TEMP_DIR = path.join(__dirname, "temp");
@@ -25,23 +24,15 @@ const interval = 1000 * 10;
 
 // auto import
 async function main() {
-  try {
-    filenames = await plansFinder(FILES_DIR_PLANNER);
-    _.forEach(filenames, async function (filename) {
-      const workbook = XLSX.readFile(path.join(FILES_DIR_PLANNER, filename));
-      const plans = parseExcel(workbook, "Export");
-      if (/TAMBAHAN/gi.test(filename))
-        return await uploadPlanTambahan(filename, plans);
-      else return await uploadPlan(filename, plans);
-    });
-    io.emit("main");
-    setTimeout(main, interval);
-  } catch (err) {
-    error(err instanceof Error && error(err.message));
-    io.emit("main");
-    setTimeout(main, interval);
-  }
+  filenames = await plansFinder(FILES_DIR_PLANNER);
+  _.forEach(filenames, async function (filename) {
+    if (/TAMBAHAN/gi.test(filename)) await uploadPlanTambahan(filename);
+    else await uploadPlanOrigin(filename);
+  });
+  io.emit("main");
+  setTimeout(main, interval);
 }
+
 main();
 
 // server
@@ -65,5 +56,5 @@ app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
 });
 
 server.listen(process.env.PORT || 3000, () => {
-  console.log("server running at *:3000");
+  console.log("server running at *:", process.env.PORT);
 });

@@ -32,7 +32,7 @@ router.get("/:log", async (req, res, next) => {
 
     return res.json({
       name: log,
-      data: splited.reverse(),
+      data: splited,
     });
   } catch (error) {
     next(error);

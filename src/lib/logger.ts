@@ -4,8 +4,9 @@ import * as log4js from "log4js";
 import moment from "moment";
 import path from "path";
 
-const LOGS_NAME = moment().format("YYYYMMDD") + ".log";
-const filename = path.join(__dirname, <string>process.env.LOGS_DIR, LOGS_NAME);
+const LOGS_NAME = moment().locale("id").format("YYYYMMDD") + ".log";
+const LOGS_DIR = path.join(__dirname, "..", "logs");
+const filename = path.join(LOGS_DIR, LOGS_NAME);
 if (!fs.existsSync(filename)) fs.createFileSync(filename);
 log4js.configure({
   appenders: {
