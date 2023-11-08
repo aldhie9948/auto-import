@@ -1,4 +1,5 @@
 require("dotenv").config();
+require("moment/locale/id")
 import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
 import { createServer } from "http";
@@ -7,10 +8,10 @@ import moment from "moment";
 import path from "path";
 import { Server } from "socket.io";
 import { plansFinder } from "./src/lib/files-finder";
-import { parseExcel } from "./src/lib/parse-excel";
 import { uploadPlanOrigin } from "./src/lib/upload-plan-origin";
-import logsRouter from "./src/routes/logs";
 import { uploadPlanTambahan } from "./src/lib/upload-plan-tambahan";
+import logsRouter from "./src/routes/logs";
+import { createLogs, info } from "./src/lib/logger";
 
 export const FILES_DIR = path.join(__dirname, "import");
 export const TEMP_DIR = path.join(__dirname, "temp");
@@ -24,6 +25,8 @@ const interval = 1000 * 10;
 
 // auto import
 async function main() {
+  // create logs 
+  createLogs()
   filenames = await plansFinder(FILES_DIR_PLANNER);
   _.forEach(filenames, async function (filename) {
     if (/TAMBAHAN/gi.test(filename)) await uploadPlanTambahan(filename);

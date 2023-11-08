@@ -7,7 +7,11 @@ import path from "path";
 const LOGS_NAME = moment().locale("id").format("YYYYMMDD") + ".log";
 const LOGS_DIR = path.join(__dirname, "..", "logs");
 const filename = path.join(LOGS_DIR, LOGS_NAME);
-if (!fs.existsSync(filename)) fs.createFileSync(filename);
+
+export function createLogs(){
+  if (!fs.existsSync(filename)) fs.createFileSync(filename);
+}
+
 log4js.configure({
   appenders: {
     main: {
