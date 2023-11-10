@@ -4,33 +4,39 @@ import * as log4js from "log4js";
 import moment from "moment";
 import path from "path";
 
-const LOGS_NAME = moment().locale("id").format("YYYYMMDD") + ".log";
-const LOGS_DIR = path.join(__dirname, "..", "logs");
-const filename = path.join(LOGS_DIR, LOGS_NAME);
+export const LOGS_DIR = path.join(__dirname, "..", "logs");
+const todayLogs  = ()=>moment().locale("id").format("YYYYMMDD").concat(".log")
 
-export function createLogs(){
+export function createLogs(dir:string){
+  const filename = path.join(dir, todayLogs())
   if (!fs.existsSync(filename)) fs.createFileSync(filename);
+  configure(filename)
 }
 
-log4js.configure({
-  appenders: {
-    main: {
-      type: "fileSync",
-      filename,
-      layout: { type: "pattern", pattern: "%d|%p|%m" },
+function configure(filename:string){
+  return log4js.configure({
+    appenders: {
+      main: {
+        type: "fileSync",
+        filename,
+        layout: { type: "pattern", pattern: "%d|%p|%m" },
+      },
+      console: {
+        type: "console",
+      },
     },
-    console: {
-      type: "console",
+    categories: {
+      default: {
+        appenders: ["console", "main"],
+        level: "trace",
+        enableCallStack: true,
+      },
     },
-  },
-  categories: {
-    default: {
-      appenders: ["console", "main"],
-      level: "trace",
-      enableCallStack: true,
-    },
-  },
-});
+  });
+
+}
+
+
 const logger = log4js.getLogger();
 
 export function info(args: any) {
