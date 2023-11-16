@@ -10,7 +10,10 @@ const dbPayroll = initKnex("m-payroll");
 
 export async function plansFinder(path: string) {
   const shifts = ["01", "02", "03"];
-  const date = moment().format("DDMMYY");
+  const dates = [0, 1].map((item) =>
+    moment().add(item, "day").format("DDMMYY")
+  );
+  console.log(dates);
   const tags = ["", "-TAMBAHAN"];
   const extenstions = ["xls", "xlsx"];
   const areas = await db.select("*").from("im_area");
@@ -20,10 +23,12 @@ export async function plansFinder(path: string) {
     .where("departemen", "like", "PPIC");
   const files = _.flatMap(shifts, (shift) => {
     return _.flatMap(areas, (area) => {
-      return _.flatMap(workers, (worker) => {
-        return _.flatMap(tags, (tag) => {
-          return _.flatMap(extenstions, (ext) => {
-            return `${shift}-${area.kode_area}-${date}-(${worker.nik})${tag}.${ext}`;
+      return _.flatMap(dates, (date) => {
+        return _.flatMap(workers, (worker) => {
+          return _.flatMap(tags, (tag) => {
+            return _.flatMap(extenstions, (ext) => {
+              return `${shift}-${area.kode_area}-${date}-(${worker.nik})${tag}.${ext}`;
+            });
           });
         });
       });
