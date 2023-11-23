@@ -26,7 +26,6 @@ const interval = 1000 * 10;
 // auto import
 async function main() {
   // create logs
-  createLogs(LOGS_DIR);
   filenames = await plansFinder(FILES_DIR_PLANNER);
   _.forEach(filenames, async function (filename) {
     if (/TAMBAHAN/gi.test(filename)) await uploadPlanTambahan(filename);
