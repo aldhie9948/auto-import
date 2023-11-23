@@ -13,7 +13,6 @@ export async function plansFinder(path: string) {
   const dates = [0, 1].map((item) =>
     moment().add(item, "day").format("DDMMYY")
   );
-  console.log(dates);
   const tags = ["", "-TAMBAHAN"];
   const extenstions = ["xls", "xlsx"];
   const areas = await db.select("*").from("im_area");
