@@ -4,6 +4,7 @@ import type { IArea, IPlan, IPlanDetail } from "./types";
 import _ from "lodash";
 import path from "path";
 import fs from "fs-extra";
+import { error } from "./logger";
 
 const dbStokBarang = initKnex("stok_barang");
 const dbPayroll = initKnex("m-payroll");
@@ -76,7 +77,13 @@ export async function checkPlanDetail(
 }
 
 export function renameFile(newName: string, oldName: string, pathDir: string) {
-  const PATH_OLD_NAME = path.join(pathDir, oldName);
-  const PATH_NEW_NAME = path.join(pathDir, newName);
-  fs.renameSync(PATH_OLD_NAME, PATH_NEW_NAME);
+  try {
+    const PATH_OLD_NAME = path.join(pathDir, oldName);
+    const PATH_NEW_NAME = path.join(pathDir, newName);
+    fs.renameSync(PATH_OLD_NAME, PATH_NEW_NAME);
+  } catch (err) {
+    let msg = "";
+    if (err instanceof Error) msg = err.message;
+    error(msg);
+  }
 }
