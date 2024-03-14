@@ -9,7 +9,7 @@ const db = initKnex("stok_barang");
 const dbPayroll = initKnex("m-payroll");
 
 export async function plansFinder(path: string) {
-  const shifts = ["01", "02", "03"];
+  const shifts = ["01", "02", "03", "T01", "T02", "T03"];
   const dates = [0, 1].map((item) =>
     moment().add(item, "day").format("DDMMYY")
   );
