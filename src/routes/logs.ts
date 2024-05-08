@@ -6,8 +6,12 @@ const router = Router();
 
 router.get("/", async (req, res, next) => {
   try {
-    const logs = await fs.readdir(LOGS_DIR);
-    return res.json(logs.reverse());
+    const logs = (await fs.readdir(LOGS_DIR)).reverse();
+    const keyword = req.query.search;
+    let results: string[] = [];
+    if (!keyword) results = logs.slice(0, 10);
+    else results = logs.filter((l) => l.includes(keyword as string));
+    return res.json(results);
   } catch (error) {
     next(error);
   }
