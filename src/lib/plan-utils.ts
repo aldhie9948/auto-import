@@ -30,7 +30,7 @@ export async function filenameToPlan(filename: string): Promise<IPlan> {
   const unformattedKaryawan = data[3];
   const karyawan = unformattedKaryawan
     .replace(/[()]/gi, "")
-    .replace(/[.].*|[-].*/gi, "");
+    .replace(/[.].*/gi, "");
   const areaDb = await (<Promise<IArea>>(
     dbStokBarang.first().from("im_area").where("kode_area", area)
   ));
@@ -38,7 +38,7 @@ export async function filenameToPlan(filename: string): Promise<IPlan> {
     .first()
     .from("data_karyawan")
     .where("nik", karyawan);
-
+    
   return {
     plan_no: [shift, area, unformattedTanggal].join("-"),
     pic: karyawan,

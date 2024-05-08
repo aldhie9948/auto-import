@@ -187,7 +187,6 @@ export async function extractDataFromFilename(file: string) {
       .first()
       .from("data_karyawan")
       .where("nik", worker);
-
     const plan: IPlan = {
       plan_no: [shift, area, date].join("-"),
       tanggal: moment(date, "DDMMYY").format("YYYY-MM-DD"),
