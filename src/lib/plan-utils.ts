@@ -1,20 +1,26 @@
-import initKnex from "./knex";
-import moment from "moment";
-import type { IArea, IPlan, IPlanDetail } from "./types";
-import _ from "lodash";
-import path from "path";
 import fs from "fs-extra";
-import { error } from "./logger";
+import _ from "lodash";
+import moment from "moment";
+import path from "path";
+import initKnex from "./knex";
+import { error, info } from "./logger";
+import type { IArea, IPlan, IPlanDetail } from "./types";
 
 const dbStokBarang = initKnex("stok_barang");
 const dbPayroll = initKnex("m-payroll");
 
 export async function checkPlan(plan: IPlan) {
-  return await (<Promise<IPlan>>dbStokBarang.first().from("im_plan").where({
+  const result = (await dbStokBarang("im_plan").first().where({
     plan_no: plan.plan_no,
     pic: plan.pic,
     shift: plan.shift,
-  }));
+  })) as IPlan;
+  if (result) {
+    error("[×] : Plan No: ".concat(plan.plan_no));
+    throw new Error(
+      "[FAILED] : Plan No. ".concat(plan.plan_no, " sudah terdaftar di MMS")
+    );
+  } else info("[✓] : Plan No: ".concat(plan.plan_no));
 }
 
 export async function filenameToPlan(filename: string): Promise<IPlan> {
@@ -31,14 +37,21 @@ export async function filenameToPlan(filename: string): Promise<IPlan> {
   const karyawan = unformattedKaryawan
     .replace(/[()]/gi, "")
     .replace(/[.].*/gi, "");
-  const areaDb = await (<Promise<IArea>>(
-    dbStokBarang.first().from("im_area").where("kode_area", area)
-  ));
-  const karyawanDb = await dbPayroll
+  const areaDb = (await dbStokBarang("im_area")
     .first()
-    .from("data_karyawan")
+    .where("kode_area", area)) as IArea;
+  const karyawanDb = await dbPayroll("data_karyawan")
+    .first()
     .where("nik", karyawan);
-    
+  if (karyawanDb)
+    info(
+      "Planner : ".concat(
+        karyawanDb.nm_depan_karyawan,
+        " (",
+        karyawanDb.nik,
+        ")"
+      )
+    );
   return {
     plan_no: [shift, area, unformattedTanggal].join("-"),
     pic: karyawan,
@@ -49,31 +62,32 @@ export async function filenameToPlan(filename: string): Promise<IPlan> {
   };
 }
 
-export async function checkPlanDetail(
-  plans: IPlanDetail[],
-  filename: string,
-  callback?: Function
-) {
-  await Promise.all(
+export async function checkPlanDetail(plans: IPlanDetail[], filename: string) {
+  const result = await Promise.all(
     _.map(plans, async (plan) => {
       // check plan_no nama file dengan plan_no isi file
       const pattern = new RegExp(plan.plan_no);
       if (!pattern.test(filename))
         throw new Error(
-          `Plan No. '${plan.plan_no}' berbeda dengan '${filename}'`
+          `[FAILED] : Plan No. '${plan.plan_no}' berbeda dengan '${filename}'`
         );
-      const detailPlan = await dbStokBarang
+      const detailPlan = await dbStokBarang("im_plan_detail AS ipd")
         .first()
-        .from("im_plan_detail")
         .where({
           plan_no: plan.plan_no,
           id_barang: plan.id_barang,
           keterangan: plan.keterangan,
           mesin: plan.mesin,
         });
-      callback && (await callback(detailPlan));
+      if (!detailPlan)
+        info("[✓] : Plan Detail: ".concat(plan.id_barang, " - ", plan.mesin));
+      else
+        error("[×] : Plan Detail: ".concat(plan.id_barang, " - ", plan.mesin));
+      return { id: plan.id_barang, plan: detailPlan };
     })
   );
+  if (result.some((r) => r.plan))
+    throw new Error("[FAILED] : Plan Detail sudah terdaftar di MMS");
 }
 
 export function renameFile(newName: string, oldName: string, pathDir: string) {

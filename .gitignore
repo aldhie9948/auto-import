@@ -4,4 +4,4 @@ node_modules
 temp/*/*
 src/logs/*
 import/*/*
-src/tests/**/*
+src/tests

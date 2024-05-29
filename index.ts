@@ -8,10 +8,10 @@ import moment from "moment";
 import path from "path";
 import { Server } from "socket.io";
 import { plansFinder } from "./src/lib/files-finder";
-import { createLogs } from "./src/lib/logger";
+import { createLogs, info, trace } from "./src/lib/logger";
 import { uploadPlanOrigin } from "./src/lib/upload-plan-origin";
-import { uploadPlanTambahan } from "./src/lib/upload-plan-tambahan";
 import logsRouter from "./src/routes/logs";
+import errorHandler from "./src/routes/error";
 
 export const FILES_DIR = path.join(__dirname, "import");
 export const TEMP_DIR = path.join(__dirname, "temp");
@@ -29,10 +29,11 @@ async function main() {
   createLogs(LOGS_DIR);
   filenames = await plansFinder(FILES_DIR_PLANNER);
   _.forEach(filenames, async function (filename) {
-    if (/TAMBAHAN/gi.test(filename)) await uploadPlanTambahan(filename);
-    else await uploadPlanOrigin(filename);
+    await uploadPlanOrigin(filename).then(() => {
+      trace(Array(50).fill("=").join(""));
+      io.emit("main");
+    });
   });
-  io.emit("main");
   setTimeout(main, interval);
 }
 
@@ -51,12 +52,8 @@ app.use(cors());
 
 app.use("/", express.static(path.join(__dirname, "src", "public")));
 app.use("/logs", logsRouter);
-app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
-  res.status(500);
-  let message = "";
-  if (err instanceof Error) message = err.message;
-  return res.json(message);
-});
+app.use(errorHandler);
+app.use("*", (_req, res) => res.status(404).json({ error: "Pages not found" }));
 
 server.listen(process.env.PORT || 3000, () => {
   console.log("server running at *:", process.env.PORT);

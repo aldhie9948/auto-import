@@ -13,12 +13,11 @@ export async function plansFinder(path: string) {
   const dates = [0, 1].map((item) =>
     moment().add(item, "day").format("DDMMYY")
   );
-  const tags = ["", "-TAMBAHAN"];
+  const tags = [""];
   const extenstions = ["xls", "xlsx"];
-  const areas = await db.select("*").from("im_area");
-  const workers = await dbPayroll
+  const areas = await db("im_area").select("*");
+  const workers = await dbPayroll("data_karyawan")
     .select("*")
-    .from("data_karyawan")
     .where("departemen", "like", "PPIC");
   const files = _.flatMap(shifts, (shift) => {
     return _.flatMap(areas, (area) => {

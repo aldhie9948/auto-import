@@ -5,15 +5,15 @@ import moment from "moment";
 import path from "path";
 
 export const LOGS_DIR = path.join(__dirname, "..", "logs");
-const todayLogs  = ()=>moment().locale("id").format("YYYYMMDD").concat(".log")
+const todayLogs = () => moment().locale("id").format("YYYYMMDD").concat(".log");
 
-export function createLogs(dir:string){
-  const filename = path.join(dir, todayLogs())
+export function createLogs(dir: string) {
+  const filename = path.join(dir, todayLogs());
   if (!fs.existsSync(filename)) fs.createFileSync(filename);
-  configure(filename)
+  configure(filename);
 }
 
-function configure(filename:string){
+function configure(filename: string) {
   return log4js.configure({
     appenders: {
       main: {
@@ -33,9 +33,7 @@ function configure(filename:string){
       },
     },
   });
-
 }
-
 
 const logger = log4js.getLogger();
 
