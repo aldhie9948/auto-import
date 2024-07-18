@@ -59,6 +59,7 @@ export async function filenameToPlan(filename: string): Promise<IPlan> {
     tanggal,
     bagian: areaDb.nama_area.toUpperCase(),
     dept: karyawanDb.departemen,
+    tanggal_selesai: null,
   };
 }
 

@@ -25,7 +25,13 @@ export function parseExcel(filepath: string) {
   );
   _.pullAt(data, 0);
   return _.map(data, (d) => {
-    return _.forOwn(d, (value, key) => {
+    // jika tanggal mulai dan selesai kosong
+    // ubah value ke null
+    ["mulai", "selesai"].forEach((i) => {
+      if (!d[i]) d[i] = null;
+    });
+
+    return _.forOwn(d, (value, _key) => {
       if (typeof value === "string") return value.trim();
     });
   });

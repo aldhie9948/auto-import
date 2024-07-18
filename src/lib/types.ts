@@ -4,10 +4,11 @@ export interface IPlanDetail {
   plan_time: string;
   plan_qty: number;
   mesin: string;
-  mulai: string;
-  selesai: string;
+  mulai: string | null;
+  selesai: string | null;
   keterangan: string;
   id?: number;
+  [key: string]: any;
 }
 
 export interface IPlan {
@@ -18,6 +19,7 @@ export interface IPlan {
   dept: string;
   bagian: string;
   shift: string;
+  tanggal_selesai: string | null;
 }
 
 export interface IArea {
