@@ -1,17 +1,17 @@
 require("dotenv").config();
 require("moment/locale/id");
 import cors from "cors";
-import express, { NextFunction, Request, Response } from "express";
+import express from "express";
 import { createServer } from "http";
 import _ from "lodash";
 import moment from "moment";
 import path from "path";
 import { Server } from "socket.io";
 import { plansFinder } from "./src/lib/files-finder";
-import { createLogs, info, trace } from "./src/lib/logger";
+import { createLogs, trace } from "./src/lib/logger";
 import { uploadPlanOrigin } from "./src/lib/upload-plan-origin";
-import logsRouter from "./src/routes/logs";
 import errorHandler from "./src/routes/error";
+import logsRouter from "./src/routes/logs";
 
 export const FILES_DIR = path.join(__dirname, "import");
 export const TEMP_DIR = path.join(__dirname, "temp");

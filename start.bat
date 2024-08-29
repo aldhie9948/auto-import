@@ -1,4 +1,2 @@
-@ECHO OFF
-ECHO Starting server auto import..
-yarn start 
-PAUSE
+@echo off
+"C:\Program Files\Git\bin\bash.exe" --login -i -c "pnpm install && pnpm start"
