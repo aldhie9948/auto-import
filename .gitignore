@@ -5,3 +5,5 @@ temp/*/*
 src/logs/*
 import/*/*
 src/tests
+pnpm-lock.yaml
+*.bat
