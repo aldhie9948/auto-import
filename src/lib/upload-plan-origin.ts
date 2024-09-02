@@ -11,7 +11,6 @@
  */
 
 import path from "path";
-import { FILES_DIR_PLANNER } from "../..";
 import initKnex from "./knex";
 import { error, info } from "./logger";
 import { parseExcel } from "./parse-excel";
@@ -22,11 +21,14 @@ import {
   renameFile,
 } from "./plan-utils";
 
+const FILES_DIR_PLANNER = path.join(process.cwd(), "import", "plan");
 const db = initKnex("stok_barang");
+
 export async function uploadPlanOrigin(filename: string, dir?: string) {
   try {
+    const directory = dir || FILES_DIR_PLANNER;
     const plan = await filenameToPlan(filename);
-    const plans = parseExcel(path.join(dir || FILES_DIR_PLANNER, filename));
+    const plans = parseExcel(path.join(directory, filename));
 
     // check im_plan_detail
     await checkPlanDetail(plans, filename);
@@ -41,19 +43,18 @@ export async function uploadPlanOrigin(filename: string, dir?: string) {
       await trx.insert(plans).into("im_plan_detail");
     });
     // rename file
-    renameFile("[DONE] ".concat(filename), filename, dir || FILES_DIR_PLANNER);
+    renameFile("[DONE] ".concat(filename), filename, directory);
 
     info(`[SUCCESS] : Import file plan '${filename}' berhasil`);
   } catch (err) {
     let msg = "";
+
     if (err instanceof Error) msg = err.message;
     error(msg);
+
     // rename file
-    renameFile(
-      "[REJECT] ".concat(filename),
-      filename,
-      dir || FILES_DIR_PLANNER
-    );
+    const directory = dir || FILES_DIR_PLANNER;
+    renameFile("[REJECT] ".concat(filename), filename, directory);
     error(`[FAILED] : Import file plan '${filename}' gagal`);
   }
 }

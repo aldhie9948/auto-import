@@ -7,33 +7,29 @@ import _ from "lodash";
 import moment from "moment";
 import path from "path";
 import { Server } from "socket.io";
-import { plansFinder } from "./src/lib/files-finder";
+import { filesFinder, plansFinder } from "./src/lib/files-finder";
 import { createLogs, trace } from "./src/lib/logger";
 import { uploadPlanOrigin } from "./src/lib/upload-plan-origin";
 import errorHandler from "./src/routes/error";
 import logsRouter from "./src/routes/logs";
 
-export const FILES_DIR = path.join(__dirname, "import");
-export const TEMP_DIR = path.join(__dirname, "temp");
-export const FILES_DIR_PLANNER = path.join(FILES_DIR, "plan");
-export const TEMP_DIR_PLANNER = path.join(TEMP_DIR, "plan");
-export const LOGS_DIR = path.join(__dirname, "src", "logs");
-
 moment.locale("id");
-let filenames: string[] = [];
 const interval = 1000 * 10;
 
 // auto import
 async function main() {
   // create logs
-  createLogs(LOGS_DIR);
-  filenames = await plansFinder(FILES_DIR_PLANNER);
-  _.forEach(filenames, async function (filename) {
+  createLogs();
+
+  const files = filesFinder();
+
+  _.forEach(files, async function (filename) {
     await uploadPlanOrigin(filename).then(() => {
       trace(Array(50).fill("=").join(""));
       io.emit("main");
     });
   });
+
   setTimeout(main, interval);
 }
 

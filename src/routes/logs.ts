@@ -1,8 +1,9 @@
 import { Router } from "express";
 import fs from "fs-extra";
 import path from "path";
-import { LOGS_DIR } from "../../index";
+
 const router = Router();
+const LOGS_DIR = path.join(process.cwd(), "src", "logs");
 
 router.get("/", async (req, res, next) => {
   try {

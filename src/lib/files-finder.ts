@@ -4,6 +4,7 @@ import { existsSync } from "fs";
 import _ from "lodash";
 import { info } from "./logger";
 import * as p from "path";
+import fs from "fs-extra";
 
 const db = initKnex("stok_barang");
 const dbPayroll = initKnex("m-payroll");
@@ -39,3 +40,14 @@ export async function plansFinder(path: string) {
     return fileExist;
   });
 }
+
+export const filesFinder = () => {
+  const FILES_DIR = p.join(process.cwd(), "import", "plan");
+  const files = fs.readdirSync(FILES_DIR);
+
+  const regex = /^\d{2}-\d{2}-\d{6}-\((\d+|[A-Z]-\d+)\)\.xls$/;
+
+  const filteredFiles = files.filter((file) => regex.test(file));
+
+  return filteredFiles;
+};

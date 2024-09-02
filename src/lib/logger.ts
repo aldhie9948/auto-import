@@ -4,11 +4,11 @@ import * as log4js from "log4js";
 import moment from "moment";
 import path from "path";
 
-export const LOGS_DIR = path.join(__dirname, "..", "logs");
+const LOGS_DIR = path.join(process.cwd(), "src", "logs");
 const todayLogs = () => moment().locale("id").format("YYYYMMDD").concat(".log");
 
-export function createLogs(dir: string) {
-  const filename = path.join(dir, todayLogs());
+export function createLogs() {
+  const filename = path.join(LOGS_DIR, todayLogs());
   if (!fs.existsSync(filename)) fs.createFileSync(filename);
   configure(filename);
 }
