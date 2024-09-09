@@ -14,7 +14,7 @@ import errorHandler from "./src/routes/error";
 import logsRouter from "./src/routes/logs";
 
 moment.locale("id");
-const interval = 1000 * 1;
+const interval = 1000 * 10;
 
 // auto import
 async function main() {
@@ -23,12 +23,14 @@ async function main() {
 
   const files = filesFinder();
 
-  _.forEach(files, async function (filename) {
-    await uploadPlanOrigin(filename).then(() => {
-      trace(Array(50).fill("=").join(""));
-      io.emit("main");
-    });
-  });
+  await Promise.all(
+    _.map(files, async (filename) => {
+      await uploadPlanOrigin(filename).then(() => {
+        trace(Array(50).fill("=").join(""));
+        io.emit("main");
+      });
+    })
+  );
 
   setTimeout(main, interval);
 }

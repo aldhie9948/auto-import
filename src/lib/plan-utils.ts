@@ -65,7 +65,7 @@ export async function filenameToPlan(filename: string): Promise<IPlan> {
 
 export async function checkPlanDetail(plans: IPlanDetail[], filename: string) {
   const result = await Promise.all(
-    _.map(plans, async (plan) => {
+    _.map(plans, async (plan, index) => {
       // check plan_no nama file dengan plan_no isi file
       const pattern = new RegExp(plan.plan_no);
       if (!pattern.test(filename))
@@ -81,9 +81,13 @@ export async function checkPlanDetail(plans: IPlanDetail[], filename: string) {
           mesin: plan.mesin,
         });
       if (!detailPlan)
-        info("[✓] : Plan Detail: ".concat(plan.id_barang, " - ", plan.mesin));
+        info(
+          `${index + 1}. [✓] : Plan Detail: ${plan.id_barang} - ${plan.mesin}`
+        );
       else
-        error("[×] : Plan Detail: ".concat(plan.id_barang, " - ", plan.mesin));
+        error(
+          `${index + 1}. [×] : Plan Detail: ${plan.id_barang} - ${plan.mesin}`
+        );
       return { id: plan.id_barang, plan: detailPlan };
     })
   );
