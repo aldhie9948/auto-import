@@ -14,7 +14,7 @@ import errorHandler from "./src/routes/error";
 import logsRouter from "./src/routes/logs";
 
 moment.locale("id");
-const interval = 1000 * 10;
+const interval = 1000 * 1;
 
 // auto import
 async function main() {
