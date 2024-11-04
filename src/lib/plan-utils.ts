@@ -43,15 +43,12 @@ export async function filenameToPlan(filename: string): Promise<IPlan> {
   const karyawanDb = await dbPayroll("data_karyawan")
     .first()
     .where("nik", karyawan);
-  if (karyawanDb)
-    info(
-      "Planner : ".concat(
-        karyawanDb.nm_depan_karyawan,
-        " (",
-        karyawanDb.nik,
-        ")"
-      )
-    );
+  if (karyawanDb) {
+    const name = karyawanDb.nm_depan_karyawan;
+    const nik = karyawanDb.nik;
+    const text = `Planner: ${name} (${nik})`;
+    info(text);
+  }
   return {
     plan_no: [shift, area, unformattedTanggal].join("-"),
     pic: karyawan,

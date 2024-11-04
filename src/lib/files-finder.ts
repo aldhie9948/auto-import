@@ -3,7 +3,7 @@ import initKnex from "./knex";
 import { existsSync } from "fs";
 import _ from "lodash";
 import { info } from "./logger";
-import * as p from "path";
+import path, * as p from "path";
 import fs from "fs-extra";
 
 const db = initKnex("stok_barang");
@@ -47,7 +47,14 @@ export const filesFinder = () => {
 
   const regex = /^\d{2}-\d{2}-\d{6}-\((\d+|[A-Z]-\d+)\)\.xls$/;
 
-  const filteredFiles = files.filter((file) => regex.test(file));
+  const filtered = _(files)
+    .filter((file) => {
+      const filepath = path.join(FILES_DIR, file);
+      const valid = regex.test(file);
+      const stat = fs.statSync(filepath);
+      return !stat.isDirectory() && valid;
+    })
+    .value();
 
-  return filteredFiles;
+  return filtered;
 };

@@ -12,6 +12,7 @@ import { createLogs, trace } from "./src/lib/logger";
 import { uploadPlanOrigin } from "./src/lib/upload-plan-origin";
 import errorHandler from "./src/routes/error";
 import logsRouter from "./src/routes/logs";
+import uploadPlan from "./src/lib/upload-plan";
 
 moment.locale("id");
 const interval = 1000 * 1;
@@ -25,10 +26,11 @@ async function main() {
 
   await Promise.all(
     _.map(files, async (filename) => {
-      await uploadPlanOrigin(filename).then(() => {
-        trace(Array(50).fill("=").join(""));
-        io.emit("main");
-      });
+      const result = await uploadPlan(filename);
+      trace(Array(50).fill("=").join(""));
+      io.emit("main");
+      return result;
+      // await uploadPlanOrigin(filename)
     })
   );
 
