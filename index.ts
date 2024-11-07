@@ -7,34 +7,37 @@ import _ from "lodash";
 import moment from "moment";
 import path from "path";
 import { Server } from "socket.io";
-import { filesFinder, plansFinder } from "./src/lib/files-finder";
+import { filesFinder } from "./src/lib/files-finder";
 import { createLogs, trace } from "./src/lib/logger";
-import { uploadPlanOrigin } from "./src/lib/upload-plan-origin";
+import uploadPlan from "./src/lib/upload-plan";
 import errorHandler from "./src/routes/error";
 import logsRouter from "./src/routes/logs";
-import uploadPlan from "./src/lib/upload-plan";
 
 moment.locale("id");
 const interval = 1000 * 1;
 
 // auto import
 async function main() {
-  // create logs
-  createLogs();
+  try {
+    // create logs
+    createLogs();
 
-  const files = filesFinder();
+    const files = filesFinder();
 
-  await Promise.all(
-    _.map(files, async (filename) => {
-      const result = await uploadPlan(filename);
-      trace(Array(50).fill("=").join(""));
-      io.emit("main");
-      return result;
-      // await uploadPlanOrigin(filename)
-    })
-  );
-
-  setTimeout(main, interval);
+    await Promise.all(
+      _.map(files, async (filename) => {
+        const result = await uploadPlan(filename);
+        trace(Array(50).fill("=").join(""));
+        io.emit("main");
+        return result;
+        // await uploadPlanOrigin(filename)
+      })
+    );
+  } catch (error) {
+    console.log(error);
+  } finally {
+    setTimeout(main, interval);
+  }
 }
 
 main();
