@@ -35,9 +35,8 @@ const uploadPlan = async (filename: string) => {
       await trx("im_plan_detail").where("plan_no", plan.plan_no).delete();
       for (const item of plans) {
         await trx("im_plan_detail").insert(item);
-        info(
-          `Menambahkan '${item.id_barang}, ${item.mesin}' - Qty: ${item.plan_qty}.`
-        );
+        const msg = `Menambahkan '${item.id_barang}, ${item.mesin}' - Qty: ${item.plan_qty}.`;
+        info(msg);
       }
     });
 

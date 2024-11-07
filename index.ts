@@ -23,16 +23,12 @@ async function main() {
     createLogs();
 
     const files = filesFinder();
-
-    await Promise.all(
-      _.map(files, async (filename) => {
-        const result = await uploadPlan(filename);
-        trace(Array(50).fill("=").join(""));
-        io.emit("main");
-        return result;
-        // await uploadPlanOrigin(filename)
-      })
-    );
+    for (const filename of files) {
+      const result = await uploadPlan(filename);
+      trace(Array(50).fill("=").join(""));
+      io.emit("main");
+      return result;
+    }
   } catch (error) {
     console.log(error);
   } finally {
