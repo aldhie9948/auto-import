@@ -1,10 +1,10 @@
-import moment from "moment";
-import initKnex from "./knex";
 import { existsSync } from "fs";
-import _ from "lodash";
-import { info } from "./logger";
-import path, * as p from "path";
 import fs from "fs-extra";
+import _ from "lodash";
+import moment from "moment";
+import path, * as p from "path";
+import initKnex from "./knex";
+import { info } from "./logger";
 
 const db = initKnex("stok_barang");
 const dbPayroll = initKnex("m-payroll");
@@ -43,6 +43,9 @@ export async function plansFinder(path: string) {
 
 export const filesFinder = () => {
   const FILES_DIR = p.join(process.cwd(), "import", "plan");
+
+  if(!fs.existsSync(FILES_DIR)) fs.mkdirSync(FILES_DIR, {recursive:true})
+
   const files = fs.readdirSync(FILES_DIR);
 
   const regex = /^\d{2}-\d{2}-\d{6}-\((\d+|[A-Z]-\d+)\)\.xls$/;
