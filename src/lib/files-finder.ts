@@ -45,7 +45,7 @@ export const filesFinder = () => {
   const FILES_DIR = p.join(process.cwd(), "import", "plan");
   const files = fs.readdirSync(FILES_DIR);
 
-  const regex = /^\d{2}-\d{2}-\d{6}-\((\d+|[A-Z]-\d+)\)\.xls$/;
+  const regex = /^\d{2}-\d{2}-\d{6}-\((\d+|[A-Z]-\d+)\)(-OT)?\.xls$/;
 
   const filtered = _(files)
     .filter((file) => {

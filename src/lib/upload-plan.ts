@@ -17,10 +17,8 @@ const uploadPlan = async (filename: string) => {
 
     // check plan detail
     for (const item of plans) {
-      const pattern = new RegExp(item.plan_no);
-      const isSamePlan = pattern.test(filename);
-      if (!isSamePlan)
-        throw new Error("Nomor plan tidak sama dengan nama file");
+      const valid = new RegExp(plan.plan_no).test(item.plan_no);
+      if (!valid) throw new Error("Nomor plan tidak sama dengan nama file");
     }
 
     // upsert plan
@@ -34,7 +32,11 @@ const uploadPlan = async (filename: string) => {
     await db.transaction(async (trx) => {
       await trx("im_plan_detail").where("plan_no", plan.plan_no).delete();
       for (const item of plans) {
-        await trx("im_plan_detail").insert(item);
+        const { plan_time } = item;
+        const properPlanTime = String(plan_time).replace(",", ".");
+        const data = { ...item, plan_time: properPlanTime };
+
+        await trx("im_plan_detail").insert(data);
         const msg = `Menambahkan '${item.id_barang}, ${item.mesin}' - Qty: ${item.plan_qty}.`;
         info(msg);
       }

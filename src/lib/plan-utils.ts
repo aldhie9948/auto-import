@@ -26,17 +26,11 @@ export async function checkPlan(plan: IPlan) {
 export async function filenameToPlan(filename: string): Promise<IPlan> {
   // regex untuk capture "-" kecuali di dalam "()"
   const pattern = new RegExp(/(?!\([^)]*)-(?![^(]*\))/gi);
-  const data = filename.split(pattern);
-  const shift = data[0];
-  const area = data[1];
+  const [shift, area, date, worker, flag] = filename.split(pattern);
   //   DDMMYY
-  const unformattedTanggal = data[2];
-  const tanggal = moment(unformattedTanggal, "DDMMYY").format("YYYY-MM-DD");
+  const tanggal = moment(date, "DDMMYY").format("YYYY-MM-DD");
   //   (<ID>).<ext>
-  const unformattedKaryawan = data[3];
-  const karyawan = unformattedKaryawan
-    .replace(/[()]/gi, "")
-    .replace(/[.].*/gi, "");
+  const karyawan = worker.replace(/[()]/gi, "").replace(/[.].*/gi, "");
   const areaDb = (await dbStokBarang("im_area")
     .first()
     .where("kode_area", area)) as IArea;
@@ -49,8 +43,15 @@ export async function filenameToPlan(filename: string): Promise<IPlan> {
     const text = `Planner: ${name} (${nik})`;
     info(text);
   }
+
+  let planStructure = [shift, area, date];
+  if (flag) {
+    const formatted = flag.replace(/[.].*/gi, "");
+    planStructure.push(formatted);
+  }
+
   return {
-    plan_no: [shift, area, unformattedTanggal].join("-"),
+    plan_no: planStructure.join("-"),
     pic: karyawan,
     shift,
     tanggal,
