@@ -21,6 +21,7 @@ export function parseExcel(filepath: string) {
       header,
       defval: "",
       rawNumbers: true,
+      blankrows: false,
     }
   );
   _.pullAt(data, 0);
