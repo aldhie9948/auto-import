@@ -1,20 +1,20 @@
 import fs from "fs-extra";
-import _ from "lodash";
-import moment from "moment";
 import path from "path";
+import day from "./day";
 import initKnex from "./knex";
 import { error, info } from "./logger";
-import type { IArea, IPlan, IPlanDetail } from "./types";
+import { IArea, IPlan } from "./types";
 
-const dbStokBarang = initKnex("stok_barang");
-const dbPayroll = initKnex("m-payroll");
+const SB = initKnex("stok_barang");
+const PY = initKnex("m-payroll");
 
 export async function checkPlan(plan: IPlan) {
-  const result = (await dbStokBarang("im_plan").first().where({
+  const result: IPlan = await SB("im_plan").first().where({
     plan_no: plan.plan_no,
     pic: plan.pic,
     shift: plan.shift,
-  })) as IPlan;
+  });
+
   if (result) {
     error("[×] : Plan No: ".concat(plan.plan_no));
     throw new Error(
@@ -26,25 +26,22 @@ export async function checkPlan(plan: IPlan) {
 export async function filenameToPlan(filename: string): Promise<IPlan> {
   // regex untuk capture "-" kecuali di dalam "()"
   const pattern = new RegExp(/(?!\([^)]*)-(?![^(]*\))/gi);
-  const [shift, area, date, worker, flag] = filename.split(pattern);
+  const [shift, areaCode, planDate, worker, flag] = filename.split(pattern);
   //   DDMMYY
-  const tanggal = moment(date, "DDMMYY").format("YYYY-MM-DD");
+  const date = day(planDate, "DDMMYY").format("YYYY-MM-DD");
   //   (<ID>).<ext>
-  const karyawan = worker.replace(/[()]/gi, "").replace(/[.].*/gi, "");
-  const areaDb = (await dbStokBarang("im_area")
-    .first()
-    .where("kode_area", area)) as IArea;
-  const karyawanDb = await dbPayroll("data_karyawan")
-    .first()
-    .where("nik", karyawan);
-  if (karyawanDb) {
-    const name = karyawanDb.nm_depan_karyawan;
-    const nik = karyawanDb.nik;
+  const employeeId = worker.replace(/[()]/gi, "").replace(/[.].*/gi, "");
+  const area: IArea = await SB("im_area").first().where("kode_area", areaCode);
+  const employee = await PY("data_karyawan").first().where("nik", employeeId);
+
+  if (employee) {
+    const { nm_depan_karyawan: name, nik } = employee;
     const text = `Planner: ${name} (${nik})`;
     info(text);
   }
 
-  let planStructure = [shift, area, date];
+  let planStructure = [shift, areaCode, planDate];
+
   if (flag) {
     const formatted = flag.replace(/[.].*/gi, "");
     planStructure.push(formatted);
@@ -52,45 +49,13 @@ export async function filenameToPlan(filename: string): Promise<IPlan> {
 
   return {
     plan_no: planStructure.join("-"),
-    pic: karyawan,
+    pic: employeeId,
     shift,
-    tanggal,
-    bagian: areaDb.nama_area.toUpperCase(),
-    dept: karyawanDb.departemen,
+    tanggal: date,
+    bagian: area.nama_area.toUpperCase(),
+    dept: employee.departemen,
     tanggal_selesai: null,
   };
-}
-
-export async function checkPlanDetail(plans: IPlanDetail[], filename: string) {
-  const result = await Promise.all(
-    _.map(plans, async (plan, index) => {
-      // check plan_no nama file dengan plan_no isi file
-      const pattern = new RegExp(plan.plan_no);
-      if (!pattern.test(filename))
-        throw new Error(
-          `[FAILED] : Plan No. '${plan.plan_no}' berbeda dengan '${filename}'`
-        );
-      const detailPlan = await dbStokBarang("im_plan_detail AS ipd")
-        .first()
-        .where({
-          plan_no: plan.plan_no,
-          id_barang: plan.id_barang,
-          keterangan: plan.keterangan,
-          mesin: plan.mesin,
-        });
-      if (!detailPlan)
-        info(
-          `${index + 1}. [✓] : Plan Detail: ${plan.id_barang} - ${plan.mesin}`
-        );
-      else
-        error(
-          `${index + 1}. [×] : Plan Detail: ${plan.id_barang} - ${plan.mesin}`
-        );
-      return { id: plan.id_barang, plan: detailPlan };
-    })
-  );
-  if (result.some((r) => r.plan))
-    throw new Error("[FAILED] : Plan Detail sudah terdaftar di MMS");
 }
 
 export function renameFile(newName: string, oldName: string, pathDir: string) {
@@ -99,8 +64,7 @@ export function renameFile(newName: string, oldName: string, pathDir: string) {
     const PATH_NEW_NAME = path.join(pathDir, newName);
     fs.renameSync(PATH_OLD_NAME, PATH_NEW_NAME);
   } catch (err) {
-    let msg = "";
-    if (err instanceof Error) msg = err.message;
+    const msg = (err as Error)?.message ?? "Error occurred whn renaming.";
     error(msg);
   }
 }

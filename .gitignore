@@ -2,8 +2,11 @@ node_modules
 # Keep environment variables out of version control
 .env*
 temp/*/*
-src/logs/*
+*logs*
 import/*/*
 src/tests
 pnpm-lock.yaml
 *.bat
+dist
+.vscode
+ecosystem.config.js

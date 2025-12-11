@@ -4,18 +4,18 @@ import { error, info } from "./logger";
 import { parseExcel } from "./parse-excel";
 import { filenameToPlan, renameFile } from "./plan-utils";
 import _ from "lodash";
+import { PLAN_FILES_PATH } from "..";
 
-const CWD = process.cwd();
-const FILES_DIR_PLANNER = path.join(CWD, "import", "plan");
-const db = initKnex("stok_barang");
+const SB = initKnex("stok_barang");
 
 const uploadPlan = async (filename: string) => {
   let prefix = "";
+
   try {
-    const filepath = path.join(FILES_DIR_PLANNER, filename);
+    const filepath = path.join(PLAN_FILES_PATH, filename);
     const plan = await filenameToPlan(filename);
-    let plans = parseExcel(filepath);
-    plans = _.filter(plans, "plan_no");
+    const parsedPlan = parseExcel(filepath);
+    const plans = _.filter(parsedPlan, "plan_no");
 
     // check plan detail
     for (const item of plans) {
@@ -26,20 +26,23 @@ const uploadPlan = async (filename: string) => {
       if (!valid) throw new Error("Nomor plan tidak sama dengan nama file");
     }
 
-    // upsert plan
-    await db.transaction(async (trx) => {
+    await SB.transaction(async (trx) => {
+      // upsert plan
       await trx("im_plan").where("plan_no", plan.plan_no).delete();
       await trx("im_plan").insert(plan);
       info(`Menambahkan plan nomor '${plan.plan_no}' ke MMS.`);
-    });
 
-    // upsert plan detail
-    await db.transaction(async (trx) => {
+      // upsert plan detail
       await trx("im_plan_detail").where("plan_no", plan.plan_no).delete();
       for (const item of plans) {
         const { plan_time } = item;
-        const properPlanTime = String(plan_time).replace(",", ".");
-        const data = { ...item, plan_time: properPlanTime };
+        let planHour = 0;
+
+        if (typeof plan_time === "string")
+          planHour = Number((plan_time || "0")?.replace(",", "."));
+        else if (typeof plan_time === "number") planHour = plan_time;
+
+        const data = { ...item, plan_time: planHour };
 
         await trx("im_plan_detail").insert(data);
         const msg = `Menambahkan '${item.id_barang}, ${item.mesin}' - Qty: ${item.plan_qty}.`;
@@ -57,7 +60,7 @@ const uploadPlan = async (filename: string) => {
     prefix = "[REJECT]";
   } finally {
     const newFileName = prefix.concat(" ", filename);
-    renameFile(newFileName, filename, FILES_DIR_PLANNER);
+    renameFile(newFileName, filename, PLAN_FILES_PATH);
   }
 };
 

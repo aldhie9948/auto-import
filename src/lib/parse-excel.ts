@@ -1,6 +1,7 @@
 import * as XLSX from "xlsx";
-import type { IPlanDetail } from "./types";
 import _ from "lodash";
+import { IPlanDetail } from "./types";
+
 const header = [
   "plan_no",
   "id_barang",

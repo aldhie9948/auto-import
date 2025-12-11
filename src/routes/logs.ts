@@ -1,9 +1,9 @@
 import { Router } from "express";
 import fs from "fs-extra";
 import path from "path";
+import { LOGS_DIR } from "../lib/logger";
 
 const router = Router();
-const LOGS_DIR = path.join(process.cwd(), "src", "logs");
 
 router.get("/", async (req, res, next) => {
   try {
@@ -44,5 +44,4 @@ router.get("/:log", async (req, res, next) => {
   }
 });
 
-const logsRouter = router;
-export default logsRouter;
+export default router;
