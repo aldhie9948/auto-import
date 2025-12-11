@@ -18,6 +18,7 @@ const server = createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
 
 export const PLAN_FILES_PATH = path.join(__dirname, "..", "import", "plan");
+const PUBLIC_PATH = path.join(__dirname, "..", "public");
 
 async function main() {
   try {
@@ -41,7 +42,7 @@ async function main() {
 app.use(express.json());
 app.use(cors());
 
-app.use("/", express.static(path.join(__dirname, "public")));
+app.use("/", express.static(PUBLIC_PATH));
 
 app.use("/logs", logsRouter);
 
