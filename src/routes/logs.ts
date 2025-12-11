@@ -12,7 +12,7 @@ router.get("/", async (req, res, next) => {
     const dirs = fs.readdirSync(LOGS_DIR);
     const logs = _(dirs)
       .reverse()
-      .filter((f) => /\w{8}.+/g.test(f))
+      .filter((f) => /\d{8}.+/g.test(f))
       .filter((log) => {
         if (!search) return true;
         return new RegExp(search, "gi").test(log);
