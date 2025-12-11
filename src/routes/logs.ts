@@ -2,21 +2,29 @@ import { Router } from "express";
 import fs from "fs-extra";
 import path from "path";
 import { LOGS_DIR } from "../lib/logger";
+import _ from "lodash";
 
 const router = Router();
 
 router.get("/", async (req, res, next) => {
   try {
-    const logs = (await fs.readdir(LOGS_DIR)).reverse();
-    const keyword = req.query.search;
-    let results: string[] = [];
-    if (!keyword) results = logs.slice(0, 10);
-    else results = logs.filter((l) => l.includes(keyword as string));
-    return res.json(results);
+    const { search = "" } = req.query as any;
+    const dirs = fs.readdirSync(LOGS_DIR);
+    const logs = _(dirs)
+      .filter((f) => /\w{8}.+/g.test(f))
+      .filter((log) => {
+        if (!search) return true;
+        return new RegExp(search, "gi").test(log);
+      })
+      .take(10)
+      .value();
+
+    return res.json(logs);
   } catch (error) {
     next(error);
   }
 });
+
 router.get("/:log", async (req, res, next) => {
   try {
     const { log } = req.params;
